@@ -1,6 +1,7 @@
 \documentclass{beamer}
 
 \usepackage{centernot}
+\usetheme{Boadilla}
 % \usepackage{beamerthemesplit} // Activate for custom appearance
 
 \title{Time, Clocks, and the Ordering of Events in a Distributed System}
@@ -12,7 +13,6 @@
 
 \frame{\titlepage}
 
-\section[Outline]{}
 \frame{\frametitle{Outline}\tableofcontents}
 
 \section{Total Ordering of Events}
@@ -23,12 +23,13 @@
 	\begin{columns}
 	\begin{column}{0.6\textwidth}
 
-		What does it mean by ``$a$ happens before $b$'' in distributed system?
+		\onslide<+-> What does it mean by ``$a$ happens before $b$'' in distributed system?
 
 		\begin{itemize}
-			\item<2-> In one process, \textbf{earlier} events happens before \textbf{later} events
-			\item<3-> \textbf{Sending message} happens before \textbf{receiving message}
-			\item<4-> If $a$ happens before $b$, and $b$ happens before $c$, then $a$ happens before $c$
+			\item<+-> Hard to define across asynchornized processes
+			\item<+-> In one process, \textbf{earlier} events happens before \textbf{later} events
+			\item<+-> \textbf{Sending message} happens before \textbf{receiving message}
+			\item<+-> If $a$ happens before $b$, and $b$ happens before $c$, then $a$ happens before $c$
 		\end{itemize}
 
 	\end{column}
@@ -36,7 +37,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/events-messages.png}
-		\caption{Events and Messages in Processes}
 		\end{figure}
 
 
@@ -53,7 +53,7 @@
 		Denote by $a\to b$ if $a$ happens before $b$.
 
 		\begin{itemize}
-			\item<2-> ``$\to$'' defines a partial order.
+			\item<2-> ``$\to$'' defines a partial order: not all pairs of events are ordered
 			\item<3-> If $a\nrightarrow b$ and $b\nrightarrow a$ then $a$ and $b$ are \emph{concurrent}
 			\item<4-> $a\to b$ is equivalent to saying one can go from $a$ to $b$ in the diagram by moving forward in time along process and message lines.
 		\end{itemize}
@@ -64,7 +64,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/events-messages.png}
-		\caption{Events and Messages in Processes}
 		\end{figure}
 
 
@@ -93,7 +92,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/events-messages.png}
-		\caption{Events and Messages in Processes}
 		\end{figure}
 
 
@@ -111,8 +109,8 @@
 
 		Logical clock is an assignment of numbers on events
 		\begin{itemize}
-			\item<2-> Clock $C_i$ assigns number $C_i\langle a\rangle$ to event $a$ in process $P_i$
-			\item<3-> Clock $C$ for the entire system defined by $C\langle a\rangle=C_i\langle a\rangle$ if $a$ is in process $P_i$
+			\item<2-> Local clock $C_i$ assigns number $C_i\langle a\rangle$ to event $a$ in process $P_i$
+			\item<3-> Global clock $C$ defined by $C\langle a\rangle=C_i\langle a\rangle$ if $a$ is in process $P_i$
 		\end{itemize}
 
 
@@ -121,7 +119,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Logical-Clock.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -138,25 +135,26 @@
 	\begin{columns}
 	\begin{column}{0.6\textwidth}
 
-		\begin{block}{Clock Condition}
+		\onslide<1->\begin{block}{Clock Condition}
 			For any events $a,b$:
 
 			if $a\to b$ then $C\langle a\rangle < C\langle b\rangle$
 		\end{block}
 
-		\begin{block}{Remark}
-			The converse is not true:
+		\onslide<2->\begin{block}{Remark}
+			The converse is not required:
 
 			$C\langle a\rangle < C\langle b\rangle$ does not imply $a\to b$
+
+			Because that would require concurrent events to have equal clock values.
 		\end{block}
 
 
 	\end{column}
 	\begin{column}{0.4\textwidth}
 
-		\begin{figure}[ht!]
+		\onslide<1->\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Logical-Clock.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -176,9 +174,10 @@
 		Implement the logical clock:
 
 		\begin{itemize}
-			\item<2-> Each process $P_i$ increments $C_i$ between successive events
-			\item<3-> If event $a$ is sending message $m$ from $P_i$, then $m$ contains timestamp $T_m=C_i\langle a\rangle$
-			\item<4-> On receiving message $m$, $P_j$ sets $C_j$ to be greater than both $T_m$ and previous event
+			\item<2-> Each process $P_i$ maintains $C_i$
+			\item<3-> $P_i$ increments $C_i$ for each new events
+			\item<4-> Each message $m$ is identified with the event $a$ that sends it, and timestamped by $T_m=C_i\langle a\rangle$
+			\item<5-> On receiving message $m$, $P_j$ sets $C_j$ to be greater than both $T_m$ and current clock value
 		\end{itemize}
 
 
@@ -187,7 +186,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Logical-Clock.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -195,6 +193,28 @@
 	\end{columns}
 
 
+}
+
+\frame
+{
+	\frametitle{Logical Clocks}
+
+	\begin{columns}
+	\begin{column}{0.6\textwidth}
+
+		Example
+
+
+	\end{column}
+	\begin{column}{0.4\textwidth}
+
+		\begin{figure}[ht!]
+		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-1.png}
+		\end{figure}
+
+
+	\end{column}
+	\end{columns}
 }
 
 \frame
@@ -212,7 +232,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-1.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -237,7 +256,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-2.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -262,7 +280,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-3.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -287,7 +304,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-4.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -312,7 +328,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-5.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -338,7 +353,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Impl-Logical-Clock-6.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -355,11 +369,12 @@
 	\begin{column}{0.6\textwidth}
 
 
-		With the logical clock, we can now define a total order ``$\Rightarrow$'' for all events.
+		With the logical clock, we are ready to define a total order ``$\Rightarrow$'' for all events.
 
 		\begin{itemize}
-			\item<2-> Define a total order $\prec$ over the processes
-			\item<3-> For events $a$ in $P_i$ and $b$ in $P_j$, $a\Rightarrow b$ if and only if either
+			\item<2-> Use the logical clock as the primary index
+			\item<3-> Define a total order $\prec$ over the processes as secondary index
+			\item<4-> Formally, for events $a$ in $P_i$ and $b$ in $P_j$, $a\Rightarrow b$ if and only if either
 				\begin{itemize}
 					\item $C_i\langle a\rangle < C_j\langle b\rangle$ or;
 					\item $C_i\langle a\rangle = C_j\langle b\rangle$ and $P_i\prec P_j$
@@ -371,7 +386,6 @@
 
 		\begin{figure}[ht!]
 		\includegraphics[width=\textwidth]{files/ClockDist-Total-Order.png}
-		\caption{Logical Clock}
 		\end{figure}
 
 
@@ -383,13 +397,23 @@
 \frame
 {
   \frametitle{Mutual Exclusion}
-  Consider a system composed of a fixed collection of processes which share a single resource. Only one process can use the resource at a time.
-
+  Mutual exclusion is common in implementing resource sharing in distributed systems.
+  In our protocol, we assume:
   \begin{itemize}
-  	\item (I) A process which has been granted the resource must release it before it can be granted to another process.
-  	\item (II) Different requests for the resource must be granted in the order in which they are made.
-  	\item (III) If every process which is granted the resource eventually releases it, then every request is eventually granted.
+  	\item<2-> Fixed collection of processes
+  	\item<3-> Single resource
   \end{itemize}
+  \onslide<4-> We want a protocol satisfying following conditions:
+  \begin{itemize}
+  	\item<5-> \textbf{(I) Mutual exclusion}: once granted, must be released before granted again.
+  	\item<6-> \textbf{(II) In Order}: Earlier requests granted ealier
+  	\item<7-> \textbf{(III) Accessibility}: If every granted request eventually releases, then every request is eventually granted.
+  \end{itemize}
+
+  \onslide<1->\begin{figure}[ht!]
+  \includegraphics[width=0.8\textwidth]{files/ClockDist-Mutual-Exclusion.png}
+  \end{figure}
+
 }
 
 \frame
@@ -402,30 +426,44 @@
   	\item<3-> Every message is eventually received
   	\item<4-> A process can send messages directly to every other process
   \end{itemize}
+
+
+  %\onslide<5->\begin{block}{Remark}
+  %\onslide<5-> Are they realizable?
+%
+  %\onslide<6-> Of course, that's just what TCP/IP gives you.
+  %\end{block}
 }
 
 \frame
 {
   \frametitle{Mutual Exclusion}
 
-  Each process maintains its own \emph{request queue}.
+  \onslide<2->Each process maintains its own \emph{request queue}.
 
   \begin{itemize}
-  	\item<2-> If process $P_i$ wants the resource, it sends a message $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ to every other process, and puts the message on its request queue, where $T_m$ is the message timestamp
-  	\item<3-> When process $P_j$ receives $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$, it puts the message on its request queue, and sends an acknowledgement message to $P_i$
+  	\item<3-> If $P_i$ wants the resource, it sends a message $m=\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ to every other process, and puts $m$ on its request queue
+  	\item<4-> When $P_j$ receives $m$, it puts $m$ on its request queue, and sends an acknowledgement message to $P_i$
   \end{itemize}
+  \onslide<1->\begin{figure}[ht!]
+  \includegraphics[width=0.5\textwidth]{files/ClockDist-Request.png}
+  \end{figure}
+
 }
 
 \frame
 {
   \frametitle{Mutual Exclusion}
 
-  Releasing the resource works in similar way.
+  Releasing the resource works in similar way, without acknowledgement.
 
   \begin{itemize}
-  	\item<2-> If process $P_i$ wants to release the resource, it sends a message $\langle T_m:P_i\text{ \emph{releases resource}}\rangle$ to every other process, and removes any $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ from its request queue
-  	\item<3-> When process $P_j$ receives $\langle T_m:P_i\text{ \emph{releases resource}}\rangle$, it removes any $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ from its request queue
+  	\item<2-> If $P_i$ wants to release the resource, it sends a message $\langle T_m':P_i\text{ \emph{releases resource}}\rangle$ to other processes, and removes any $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ from its request queue
+  	\item<3-> When $P_j$ receives $\langle T_m':P_i\text{ \emph{releases resource}}\rangle$, it removes any $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ from its request queue
   \end{itemize}
+  \begin{figure}[ht!]
+  \includegraphics[width=0.5\textwidth]{files/ClockDist-Release.png}
+  \end{figure}
 }
 
 \frame
@@ -438,6 +476,9 @@
   	\item<2-> There is a $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ in its request queue ordered before any other messages inside the queue by relation ``$\Rightarrow$''
   	\item<3-> $P_i$ received the acknowledgements from every other process
   \end{itemize}
+  \onslide<4-> Now $P_i$ can safely access the resource, assured that nobody else is granted the resource.
+
+  \onslide<5-> But why does this work?
 }
 
 \frame
@@ -446,15 +487,157 @@
   The above protocol satisfies conditions (I)(II) and (III).
 
   \begin{itemize}
-  	\item<2-> \textbf{Conditions I and II:} When $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ is sent, no request ordered after this request will be granted before this request is released, because they either:
+  	\item<2-> \textbf{Conditions I and II:} From the point of view of $m=\langle T_m:P_i\text{ \emph{requests resource}}\rangle$, any request $m'$ issued later by $P_j$ is in either of the following cases:
   		\begin{itemize}
-  			\item Are not acknowledged by $P_i$
-  			\item Received $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ which is ordered before them in their queues
+  			\item Acknowledged by $P_i$, then $P_j$ must also have received $m$, and $m'$ is superceded by $m$ in $P_j$'s queue
+  			\item Not acknowledged by $P_i$
   		\end{itemize}
-		\item<3-> \textbf{Condition III:} If all the requests before $\langle T_m:P_i\text{ \emph{requests resource}}\rangle$ are released, this request will be ordered before any other requests in $P_i$'s queue
+  	In any case, $m'$ is not granted.
+  	\onslide<3-> In summary, for any request $m$, no request issued later than $m$ will be granted before $m$ is released.
+		\item<4-> \textbf{Condition III:} For each message $m=\langle T_m:P_i\text{ \emph{requests resource}}\rangle$:
+			\begin{itemize}
+				\item $m$ will be the oldest in $P_i$'s queue eventually
+				\item $P_i$ will receive all acknowledgements eventually
+			\end{itemize}
   \end{itemize}
 }
 
+\frame
+{
+  \frametitle{Mutual Exclusion}
+  \begin{block}{Remark}
+	  \begin{itemize}
+	  	\item<2-> No centralized authority, everything happens automatically in sending and receiving messages
+	  	\item<3-> Requires all parties trusted. Malicious party can easily forge timestamps, refuse to send acknowledgement, etc.
+	  	\item<4-> The shared resource is an abstract concept, which can be anything
+	  	\item<5-> Can be easily extended to multiple resources
+	  \end{itemize}
+	  \onslide<6-> Applied to consensus protocol?
+	  \begin{itemize}
+	  	\item<7-> Cryptographic mechanisms for trustlessness?
+	  	\item<8-> Shared resource can be: leadership, write permission, ...
+	  \end{itemize}
+  \end{block}
+}
+
+\section{Physical Clock}
+\frame
+{
+  \frametitle{Physical Clock}
+  \onslide<+-> Let $t$ denote the real, ideal physical time, which is not available to any processes
+  \begin{itemize}
+  	\item<+-> $P_i$ only has access to a function of $t$, called a clock, denoted by $C_i(t)$ which is a (almost) differentiable function
+  	\item<+-> The clock rates $dC_i(t)/dt$ approximate $1$
+  	\item<+-> The idea is processes sending to each other synchronization messages, to ensure that $|C_i(t)-C_j(t)| \leq \varepsilon$ for all $t$ and all pairs of $i,j$, where $\varepsilon$ is related to parameters including:
+  	\begin{itemize}
+  		\item<+-> Global bound on message delay
+  		\item<+-> Frequencies of synchronization messages sent to each other
+  		\item<+-> Accuracy of the local clocks
+  	\end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Physical Clock}
+	\begin{columns}
+	\begin{column}{0.6\textwidth}
+		The clocks run at different rates and start deviating from each other
+	\end{column}
+	\begin{column}{0.4\textwidth}
+
+		\begin{figure}[ht!]
+		\includegraphics[width=\textwidth]{files/ClockDist-Physical-Clock-1.png}
+		\end{figure}
+
+	\end{column}
+	\end{columns}
+}
+
+\frame
+{
+  \frametitle{Physical Clock}
+	\begin{columns}
+	\begin{column}{0.6\textwidth}
+		The third process receives a message from second process, and resets clock.
+	\end{column}
+	\begin{column}{0.4\textwidth}
+
+		\begin{figure}[ht!]
+		\includegraphics[width=\textwidth]{files/ClockDist-Physical-Clock-2.png}
+		\end{figure}
+
+	\end{column}
+	\end{columns}
+}
+
+\frame
+{
+  \frametitle{Physical Clock}
+	\begin{columns}
+	\begin{column}{0.6\textwidth}
+		The second process receives a message from first process, and resets clock.
+	\end{column}
+	\begin{column}{0.4\textwidth}
+
+		\begin{figure}[ht!]
+		\includegraphics[width=\textwidth]{files/ClockDist-Physical-Clock-3.png}
+		\end{figure}
+
+	\end{column}
+	\end{columns}
+}
+
+\frame
+{
+  \frametitle{Physical Clock}
+	\begin{columns}
+	\begin{column}{0.6\textwidth}
+		The third process receives a message from first process, and resets clock.
+	\end{column}
+	\begin{column}{0.4\textwidth}
+
+		\begin{figure}[ht!]
+		\includegraphics[width=\textwidth]{files/ClockDist-Physical-Clock-4.png}
+		\end{figure}
+
+	\end{column}
+	\end{columns}
+}
+
+\frame
+{
+  \frametitle{Physical Clock}
+	\begin{columns}
+	\begin{column}{0.6\textwidth}
+		Given appropriate assumptions, the clocks are syncronized within bounded error.
+	\end{column}
+	\begin{column}{0.4\textwidth}
+
+		\begin{figure}[ht!]
+		\includegraphics[width=\textwidth]{files/ClockDist-Physical-Clock-5.png}
+		\end{figure}
+
+	\end{column}
+	\end{columns}
+}
+
+\frame
+{
+  \frametitle{Summary}
+  \begin{itemize}
+  	\item Total ordering
+  		\begin{itemize}
+  			\item Partial order ``happens before'' on events: $\to$
+  			\item Logical clock that respects ``$\to$''
+  			\item Logical clock + Total order on processes $\Rightarrow$ total order on events
+  		\end{itemize}
+  	\item Protocol that achieves mutual exclusion, and something more
+  	\item Physical clock
+  \end{itemize}
+}
+
+\iffalse
 \section{Physical Clock}
 \frame
 {
@@ -577,6 +760,7 @@
   \end{enumerate}
   \end{block}
 }
+\fi
 
 \frame
 {
